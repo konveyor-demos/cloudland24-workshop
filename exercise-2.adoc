@@ -1,0 +1,122 @@
+== Exercise 2 - Modernize application with OpenRewrite 
+
+=== Run the migration
+
+. Make sure that your are using the `workshop` branch when starting the exercise. If you are on a different branch, run this command:
++
+[source, bash]
+----
+git checkout workshop
+----
+
+. Run the PetClinic once to see if it builds and view the version:
++
+[source, bash]
+----
+mvn spring-boot:run
+----
++
+Look at the Log Output of the Spring Boot application.
++
+TIP: You can see its running Spring 2.6.6.
+
+. Add Rewrite Plugin Dependency and Recipe configuration in the pom.xml under <plugins>.
++
+[source, xml]
+----
+      <plugin>
+        <groupId>org.openrewrite.maven</groupId>
+        <artifactId>rewrite-maven-plugin</artifactId>
+        <version>5.27.0</version>
+        <configuration>
+          <activeRecipes>
+            <recipe>org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_2</recipe>
+          </activeRecipes>
+          <activeStyles>
+            <style>org.openrewrite.java.SpringFormat</style>
+          </activeStyles>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.openrewrite.recipe</groupId>
+            <artifactId>rewrite-spring</artifactId>
+            <version>5.7.0</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+----
++
+[NOTE]
+==== 
+The SpringFormat style is defined under `activeStyles`, so that OpenRewrite automatically formats in the way Spring expects it. 
+This should prevent any formatting issues after the transformation, but does not format everything in a way that fulfills the validation of the Spring Format tool.
+====
++
+Then run the recipe with:
++
+[source, bash]
+----
+mvn rewrite:run
+----
+
+. Now it's time to verify if everything works after the migration. For that, run:
++
+[source, bash]
+----
+mvn verify 
+----
++
+[TIP]
+====
+You should see two successive errors after running the verify command, one related to formatting and one related to a compilation error.
+Check the errors with an IDE like Intellij or VS Code and try to fix them.
+====
+
+'''
+
+CAUTION: Do not read the following sections if you did not solve the issues yourself yet. 
+
+
+=== Solution for the formatting issue:
+
+The formatting is not proper after the Open Rewrite commands as the validation of the `spring-javaformat-maven-plugin` fails.
+
+Fix this by running:
+
+[source, bash]
+----
+mvn spring-javaformat:apply
+----
+
+=== Solution for the compilation error:
+
+The XML Binding Dependency is missing as the JavaEE Bindings were deprecated after Java 11. 
+
+. We need to add the dependency to the pom: 
++
+[source,xml]
+----
+<dependency>
+  <groupId>jakarta.xml.bind</groupId>
+  <artifactId>jakarta.xml.bind-api</artifactId>
+  <version>4.0.2</version>
+</dependency>
+----
+
+. Verify that the change solved the error:
++
+[source,bash]
+----
+mvn verify 
+----
++
+TIP: You should now see no errors.
+
+. Now execute to see if its actually Spring Boot 3:
++
+[source,bash]
+----
+mvn spring-boot:run
+----
++
+TIP: You should see Spring 3.x. as version in the Log Output.
