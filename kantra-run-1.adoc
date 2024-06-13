@@ -1,0 +1,22 @@
+= Running Kantra (Minimal)
+:icons: font
+
+[source, bash]
+.Run Kantra
+----
+kantra \ # <1>
+  analyze \ # <2>
+  --overwrite \ # <3>
+  -i . \ # <4>
+  -o ../out \ # <5>
+  --mode source-only \ # <6>
+  \
+  --target cloud-readiness # <7>
+----
+<1> `kantra` im Pfad? Sonst z.B. `../kantra`
+<2> Kantra Sub-Kommando `analyze` (vgl. `kantra help`)
+<3> Bestehende Ergebnisse überschreiben
+<4> Eingabe: Aktuelles Verzeichnis
+<5> Ausgabe: Verzeichnis außerhalb des aktuellen Verzeichnisses
+<6> Nur eigenen Quellcode analysieren, keine Abhängigkeiten
+<7> Minimales Ziel: Cloud-Migration (generisch)
